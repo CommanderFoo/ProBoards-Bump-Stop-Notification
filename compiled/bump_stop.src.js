@@ -1,3 +1,28 @@
+/**
+* @license
+* The MIT License (MIT)
+*
+* Copyright (c) 2017 pixeldepth.net - http://support.proboards.com/user/2671
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
 class Bump_Stop {
 
 	static init(){
@@ -64,7 +89,7 @@ class Bump_Stop {
 		let now = + new Date();
 		let last_post = pb.data("page").thread.last_post_time * 1000;
 		let diff = Math.abs(now - last_post);
-		let message = {};
+		let message = null;
 		let lowest = Number.MAX_SAFE_INTEGER;
 
 		for(let i = 0, l = this.settings.limits.length; i < l; ++ i){
@@ -75,22 +100,24 @@ class Bump_Stop {
 				let show_for_exempted = (limit.show_for_exempted == "")? true : !! parseInt(limit.show_for_exempted, 10);
 				let show_for_guests = (limit.show_for_guests == "")? true : !! parseInt(limit.show_for_guests, 10);
 
-				console.log(exempted, show_for_exempted, show_for_guests);
+				//console.log(exempted, show_for_exempted, show_for_guests);
 
 				if((exempted && !show_for_exempted) || (!pb.data("user").is_logged_in && !show_for_guests)){
 					continue;
 				}
 
-				if(parseInt(limit.disable_replies, 10) == 1 && !exempted){
-					this.disable_replies();
-				}
-
 				let days_cut_off = parseInt(limit.days, 10) || 0;
 				let days_since_last_post = Math.round(diff / one_day);
 
-				if(days_since_last_post >= days_cut_off && days_cut_off < lowest){
-					lowest = days_cut_off;
-					message = limit;
+				if(days_since_last_post >= days_cut_off){
+					if(parseInt(limit.disable_replies, 10) == 1 && !exempted){
+						this.disable_replies();
+					}
+
+					if(days_cut_off < lowest){
+						lowest = days_cut_off;
+						message = limit;
+					}
 				}
 			}
 		}
